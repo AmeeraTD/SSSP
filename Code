@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+using namespace std;
+
+const int INF = numeric_limits<int>::max(); // Use maximum integer value as infinity
+
+vector<vector<int>> makeGraph(const vector<vector<int>>& weighted_adjacency_matrix) {
+    int numVertices = weighted_adjacency_matrix.size();
+    vector<vector<int>> graph(numVertices, vector<int>(numVertices, 0));
+
+    for (int i = 0; i < numVertices; i++) {
+        for (int j = 0; j < numVertices; j++) {
+            if (weighted_adjacency_matrix[i][j] != 0) {
+                graph[i][j] = weighted_adjacency_matrix[i][j];
+                graph[j][i] = weighted_adjacency_matrix[i][j]; // Since it's an undirected graph
+            }
+        }
+    }
+
+    return graph;
+}
+
+void Dijkstra(const vector<vector<int>>& graph, int source, vector<int>& distances) {
+    int numVertices = graph.size();
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    distances.resize(numVertices, INF);
+    distances[source] = 0;
+    pq.push(make_pair(distances[source], source));
+
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+
+        for (int v = 0; v < numVertices; v++) {
+            int weight = graph[u][v];
+
+            if (weight != 0 && distances[u] + weight < distances[v]) {
+                distances[v] = distances[u] + weight;
+                pq.push(make_pair(distances[v], v));
+            }
+        }
+    }
+}
+
+int main() {
+    vector<vector<int>> weighted_adjacency_matrix = {
+        { 0, 10, 0, 0, 15, 5 },
+        { 10, 0, 10, 30, 0, 0 },
+        { 0, 10, 0, 12, 5, 0 },
+        { 0, 30, 12, 0, 0, 20 },
+        { 15, 0, 5, 0, 0, 0 },
+        { 5, 0, 0, 20, 0, 0 }
+    };
+
+    vector<vector<int>> graph = makeGraph(weighted_adjacency_matrix);
+    vector<vector<int>> distancesList(6);
+    float totalTime;
+    for (int i = 0; i < 6; i++) {
+        Dijkstra(graph, i, distancesList[i]);
+
+        cout << " Source city is " << i << endl;
+        totalTime=0;
+        for (int j = 0; j < distancesList[i].size(); j++) {
+            cout << " time to City " << j << ": " << distancesList[i][j] << endl;
+            totalTime+=distancesList[i][j];
+        }
+        cout <<"Average time "<<totalTime/5 << endl;
+    }
+
+    return 0;
+}
